@@ -29,6 +29,7 @@ class TMDBClient {
         case webAuth
         case logout
         case getFavourites
+        case search(String)
         
         var stringValue: String {
             switch self {
@@ -45,6 +46,8 @@ class TMDBClient {
                 return Endpoints.base + "/authentication/session" + Endpoints.apiKeyParam
             case .getFavourites:
                 return Endpoints.base + "/account/\(Auth.accountId)/favorite/movies" + Endpoints.apiKeyParam + "&session_id=\(Auth.sessionId)"
+            case .search(let query):
+                return Endpoints.base + "/search/movie" + Endpoints.apiKeyParam + "&query=\(query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")"
             }
         }
         
@@ -53,6 +56,18 @@ class TMDBClient {
         }
     }
     
+    
+    class func seach (movieName: String, completionHandler: @escaping ([Movie], Error?) -> Void) {
+        
+        taskForGETRequest(url: Endpoints.search(movieName).url, responseType: MovieResults.self) { (response, error) in
+            if let response = response {
+                completionHandler(response.results, nil)
+            } else {
+                completionHandler([], error)
+            }
+        }
+        
+    }
     
     class func getFavourites(completionHandler: @escaping ([Movie], Error?) -> Void) {
         
