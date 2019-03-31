@@ -171,7 +171,8 @@ class TMDBClient {
                 completionHandler(error)
                 return
             }
-            
+            Auth.requestToken = ""
+            Auth.sessionId = ""
             completionHandler(nil)
         }
         task.resume()
