@@ -28,6 +28,7 @@ class TMDBClient {
         case createSessionId
         case webAuth
         case logout
+        case getFavourites
         
         var stringValue: String {
             switch self {
@@ -42,6 +43,8 @@ class TMDBClient {
                     return "https://www.themoviedb.org/authenticate/" + Auth.requestToken + "?redirect_to=mymovies:authenticate"
             case .logout:
                 return Endpoints.base + "/authentication/session" + Endpoints.apiKeyParam
+            case .getFavourites:
+                return Endpoints.base + "/account/\(Auth.accountId)/favorite/movies" + Endpoints.apiKeyParam + "&session_id=\(Auth.sessionId)"
             }
         }
         
@@ -50,6 +53,18 @@ class TMDBClient {
         }
     }
     
+    
+    class func getFavourites(completionHandler: @escaping ([Movie], Error?) -> Void) {
+        
+        taskForGETRequest(url: Endpoints.getFavourites.url, responseType: MovieResults.self) { (response, error) in
+            if let response = response {
+                completionHandler(response.results, nil)
+            } else {
+                completionHandler([], error)
+            }
+        }
+        
+    }
 
     class func taskForPOSTRequest<RequestType: Encodable, ResponseType: Decodable>(url: URL, responseType: ResponseType.Type, body: RequestType, completion: @escaping (ResponseType?, Error?) -> Void) {
         
