@@ -31,11 +31,9 @@ class LoginViewController: UIViewController {
         if success {
             print("Access Token: \(TMDBClient.Auth.requestToken)")
             
-            DispatchQueue.main.async {
-                let user = LoginRequest(userName: self.emailTextField.text!, password: self.passwordTextField.text!, requestToken: TMDBClient.Auth.requestToken)
-                
-                TMDBClient.requestLogin(for: user, completionHandler: self.handleRequestLogin(success:error:))
-            }
+            let user = LoginRequest(userName: self.emailTextField.text!, password: self.passwordTextField.text!, requestToken: TMDBClient.Auth.requestToken)
+            
+            TMDBClient.requestLogin(for: user, completionHandler: self.handleRequestLogin(success:error:))
         }
     }
     
