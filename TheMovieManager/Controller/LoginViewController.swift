@@ -46,9 +46,7 @@ class LoginViewController: UIViewController {
     
     func handleRequestSessionResponse(success: Bool, error: Error?) {
         if success {
-            DispatchQueue.main.async {
-                self.performSegue(withIdentifier: "completeLogin", sender: nil)
-            }
+            self.performSegue(withIdentifier: "completeLogin", sender: nil)
         }
     }
     

@@ -50,6 +50,43 @@ class TMDBClient {
         }
     }
     
+    
+//    class func taskForPOSTRequest<RequestType: Encodable, ResponseType: Decodable>(url: URL, responseType: ResponseType.Type, body: RequestType, completion: @escaping (ResponseType?, Error?) -> Void)
+
+    class func taskForPOSTRequest<RequestType: Encodable, ResponseType: Decodable>(url: URL, responseType: ResponseType.Type, body: RequestType, completion: @escaping (ResponseType?, Error?) -> Void) {
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try! JSONEncoder().encode(body)
+        
+        let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
+            guard let data = data else {
+                DispatchQueue.main.async {
+                    completion(nil, error)
+                }
+                return
+            }
+            
+            let decoder = JSONDecoder()
+            do {
+                let response = try decoder.decode(ResponseType.self, from: data)
+                DispatchQueue.main.async {
+                    completion(response, nil)
+                }
+                
+            } catch {
+                DispatchQueue.main.async {
+                    completion(nil, error)
+                }
+            }
+        }
+        task.resume()
+        
+    }
+    
+    
+    
     class func taskForGETRequest<ResponseType: Decodable>(url: URL, responseType: ResponseType.Type, completionHandler: @escaping (ResponseType?, Error?) -> Void) {
         
         let task = URLSession.shared.dataTask(with: url) { (data, response, error) in
@@ -105,68 +142,30 @@ class TMDBClient {
     
     class func requestLogin(for user: LoginRequest,completionHandler: @escaping (Bool, Error?)->Void) {
         
-        var request = URLRequest(url: Endpoints.login.url)
-        request.httpMethod = "POST"
-        
-        let encoder = JSONEncoder()
-        
-        do {
-            let jsonLoginRequestBody = try encoder.encode(user)
-            request.httpBody = jsonLoginRequestBody
-            request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-            
-            let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
-                guard let data = data else {
-                    completionHandler(false, error)
-                    return
-                }
-                
-                let decoder = JSONDecoder()
-                
-                do {
-                    let responseObject = try decoder.decode(RequestTokenResponse.self, from: data)
-                    Auth.requestToken = responseObject.requestToken
-                    completionHandler(true, nil)
-                } catch {
-                    completionHandler(false, nil)
-                }
-
+        taskForPOSTRequest(url: Endpoints.login.url, responseType: RequestTokenResponse.self, body: user) { (response, error) in
+            if let response = response {
+                Auth.requestToken = response.requestToken
+                completionHandler(true, nil)
+            } else {
+                completionHandler(false, error)
             }
-            
-            task.resume()
-            
-        }catch {
-            completionHandler(false, error)
         }
     }
     
     
     class func requestSessionId(completionHandler: @escaping (Bool, Error?) -> Void) {
         
-        var request = URLRequest(url: Endpoints.createSessionId.url)
-        request.httpMethod = "POST"
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        
         let sessionRequestBody = PostSession(requestToken: Auth.requestToken)
-        request.httpBody = try! JSONEncoder().encode(sessionRequestBody)
         
-        let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
-            guard let data = data else {
-                completionHandler(false, error)
-                return
-            }
+        taskForPOSTRequest(url: Endpoints.createSessionId.url, responseType: SessionResponse.self, body: sessionRequestBody) { (response, error) in
             
-            let decoder = JSONDecoder()
-            do {
-                let sessionData = try decoder.decode(SessionResponse.self, from: data)
-                Auth.sessionId = sessionData.sessionId
+            if let response = response {
+                Auth.sessionId = response.sessionId
                 completionHandler(true, nil)
-            } catch {
-                completionHandler(false, error)
+            } else {
+                completionHandler(false, nil)
             }
         }
-        
-        task.resume()
     }
     
     class func logout(completionHandler: @escaping (Error?) -> Void) {
