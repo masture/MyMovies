@@ -25,6 +25,7 @@ class TMDBClient {
         case getWatchlist
         case getRequestToken
         case login
+        case createSessionId
         
         var stringValue: String {
             switch self {
@@ -33,6 +34,8 @@ class TMDBClient {
                 return Endpoints.base + "/authentication/token/new" + Endpoints.apiKeyParam
             case .login:
                 return Endpoints.base + "/authentication/token/validate_with_login" + Endpoints.apiKeyParam
+            case .createSessionId:
+                return Endpoints.base + "/authentication/session/new" + Endpoints.apiKeyParam
             }
         }
         
@@ -118,6 +121,35 @@ class TMDBClient {
         }catch {
             completionHandler(false, error)
         }
+    }
+    
+    
+    class func requestSessionId(completionHandler: @escaping (Bool, Error?) -> Void) {
+        
+        var request = URLRequest(url: Endpoints.createSessionId.url)
+        request.httpMethod = "POST"
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        let sessionRequestBody = PostSession(requestToken: Auth.requestToken)
+        request.httpBody = try! JSONEncoder().encode(sessionRequestBody)
+        
+        let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
+            guard let data = data else {
+                completionHandler(false, error)
+                return
+            }
+            
+            let decoder = JSONDecoder()
+            do {
+                let sessionData = try decoder.decode(SessionResponse.self, from: data)
+                Auth.sessionId = sessionData.sessionId
+                completionHandler(true, nil)
+            } catch {
+                completionHandler(false, error)
+            }
+        }
+        
+        task.resume()
     }
     
 }

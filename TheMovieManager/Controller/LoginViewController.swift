@@ -41,12 +41,18 @@ class LoginViewController: UIViewController {
     
     private func handleRequestLogin(success: Bool, error: Error?) {
         if success {
+            TMDBClient.requestSessionId(completionHandler: handleRequestSessionResponse(success:error:))
+        }
+    }
+    
+    
+    private func handleRequestSessionResponse(success: Bool, error: Error?) {
+        if success {
             DispatchQueue.main.async {
                 self.performSegue(withIdentifier: "completeLogin", sender: nil)
             }
         }
     }
-    
     
     @IBAction func loginViaWebsiteTapped() {
         performSegue(withIdentifier: "completeLogin", sender: nil)
