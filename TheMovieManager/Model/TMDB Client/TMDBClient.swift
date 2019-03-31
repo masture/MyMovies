@@ -24,12 +24,15 @@ class TMDBClient {
         
         case getWatchlist
         case getRequestToken
+        case login
         
         var stringValue: String {
             switch self {
             case .getWatchlist: return Endpoints.base + "/account/\(Auth.accountId)/watchlist/movies" + Endpoints.apiKeyParam + "&session_id=\(Auth.sessionId)"
             case .getRequestToken:
                 return Endpoints.base + "/authentication/token/new" + Endpoints.apiKeyParam
+            case .login:
+                return Endpoints.base + "/authentication/token/validate_with_login" + Endpoints.apiKeyParam
             }
         }
         
@@ -77,6 +80,44 @@ class TMDBClient {
         
         task.resume()
 
+    }
+    
+    
+    class func requestLogin(for user: LoginRequest,completionHandler: @escaping (Bool, Error?)->Void) {
+        
+        var request = URLRequest(url: Endpoints.login.url)
+        request.httpMethod = "POST"
+        
+        let encoder = JSONEncoder()
+        
+        do {
+            let jsonLoginRequestBody = try encoder.encode(user)
+            request.httpBody = jsonLoginRequestBody
+            request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+            
+            let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
+                guard let data = data else {
+                    completionHandler(false, error)
+                    return
+                }
+                
+                let decoder = JSONDecoder()
+                
+                do {
+                    let responseObject = try decoder.decode(RequestTokenResponse.self, from: data)
+                    Auth.requestToken = responseObject.requestToken
+                    completionHandler(true, nil)
+                } catch {
+                    completionHandler(false, nil)
+                }
+
+            }
+            
+            task.resume()
+            
+        }catch {
+            completionHandler(false, error)
+        }
     }
     
 }
