@@ -14,9 +14,19 @@ class FavoritesViewController: UIViewController {
     
     var selectedIndex = 0
     
+    lazy var refreshControl: UIRefreshControl = {
+        let refreshControl = UIRefreshControl()
+        refreshControl.addTarget(self, action:
+            #selector(handleRefresh(_:)),
+                                 for: UIControl.Event.valueChanged)
+        refreshControl.tintColor = UIColor.blue
+        
+        return refreshControl
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        tableView.refreshControl = refreshControl
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -26,6 +36,15 @@ class FavoritesViewController: UIViewController {
             MovieModel.favorites = movies
             self.tableView.reloadData()
         }
+    }
+    
+    @objc func handleRefresh(_ refreshControl: UIRefreshControl) {
+        TMDBClient.getFavourites { movies, error in
+            MovieModel.watchlist = movies
+            self.tableView.reloadData()
+            self.tableView.refreshControl?.endRefreshing()
+        }
+        
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {

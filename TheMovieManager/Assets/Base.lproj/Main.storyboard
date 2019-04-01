@@ -18,7 +18,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Camera" translatesAutoresizingMaskIntoConstraints="NO" id="n8z-V4-qAW">
+                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="MyMovie" translatesAutoresizingMaskIntoConstraints="NO" id="n8z-V4-qAW">
                                 <rect key="frame" x="16" y="20" width="343" height="128"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="128" id="FR4-d7-bca"/>
@@ -92,7 +92,11 @@
                                 <color key="highlightedColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             </label>
                             <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="white" translatesAutoresizingMaskIntoConstraints="NO" id="55E-zn-R3O">
-                                <rect key="frame" x="177.5" y="466" width="20" height="20"/>
+                                <rect key="frame" x="167.5" y="466" width="40" height="40"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="40" id="gt7-js-9Js"/>
+                                    <constraint firstAttribute="width" constant="40" id="kvV-xc-mKz"/>
+                                </constraints>
                             </activityIndicatorView>
                         </subviews>
                         <color key="backgroundColor" red="0.0078431372550000003" green="0.70196078429999997" blue="0.89411764709999997" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -450,10 +454,10 @@
         </scene>
     </scenes>
     <resources>
-        <image name="Camera" width="64" height="64"/>
         <image name="Favorite" width="32" height="32"/>
         <image name="Genre" width="30" height="30"/>
         <image name="List" width="32" height="32"/>
+        <image name="MyMovie" width="512" height="512"/>
     </resources>
     <inferredMetricsTieBreakers>
         <segue reference="co5-nL-1jj"/>

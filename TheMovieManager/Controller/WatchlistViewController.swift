@@ -14,6 +14,17 @@ class WatchlistViewController: UIViewController {
     
     var selectedIndex = 0
     
+    
+    lazy var refreshControl: UIRefreshControl = {
+        let refreshControl = UIRefreshControl()
+        refreshControl.addTarget(self, action:
+            #selector(handleRefresh(_:)),
+                                 for: UIControl.Event.valueChanged)
+        refreshControl.tintColor = UIColor.blue
+        
+        return refreshControl
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -21,12 +32,24 @@ class WatchlistViewController: UIViewController {
             MovieModel.watchlist = movies
                 self.tableView.reloadData()
         }
+        
+        tableView.refreshControl = refreshControl
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
         tableView.reloadData()
+    }
+    
+    
+    @objc func handleRefresh(_ refreshControl: UIRefreshControl) {
+        TMDBClient.getWatchlist() { movies, error in
+            MovieModel.watchlist = movies
+            self.tableView.reloadData()
+            self.tableView.refreshControl?.endRefreshing()
+        }
+        
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
