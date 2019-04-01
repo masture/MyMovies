@@ -10,6 +10,7 @@ import UIKit
 
 class LoginViewController: UIViewController {
     
+    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     @IBOutlet weak var emailTextField: UITextField!
     @IBOutlet weak var passwordTextField: UITextField!
     @IBOutlet weak var loginButton: UIButton!
@@ -23,7 +24,7 @@ class LoginViewController: UIViewController {
     }
     
     @IBAction func loginTapped(_ sender: UIButton) {
-        
+        setLoggingIn(true)
         TMDBClient.requestToken(completionHandler: handleRequestTokenResponse(success:error:))
     }
     
@@ -45,13 +46,14 @@ class LoginViewController: UIViewController {
     
     
     func handleRequestSessionResponse(success: Bool, error: Error?) {
+        setLoggingIn(false)
         if success {
             self.performSegue(withIdentifier: "completeLogin", sender: nil)
         }
     }
     
     @IBAction func loginViaWebsiteTapped() {
-
+        setLoggingIn(true)
         TMDBClient.requestToken { (success, error) in
             if success {
                 DispatchQueue.main.async {
@@ -62,4 +64,11 @@ class LoginViewController: UIViewController {
         }
     }
     
+    private func setLoggingIn(_ loggingIn: Bool) {
+        if loggingIn {
+            activityIndicator.startAnimating()
+        } else {
+            activityIndicator.stopAnimating()
+        }
+    }
 }
