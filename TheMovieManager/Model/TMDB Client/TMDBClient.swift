@@ -114,16 +114,16 @@ class TMDBClient {
     }
     
     
-    class func seach (movieName: String, completionHandler: @escaping ([Movie], Error?) -> Void) {
+    class func seach (movieName: String, completionHandler: @escaping ([Movie], Error?) -> Void) -> URLSessionTask {
         
-        taskForGETRequest(url: Endpoints.search(movieName).url, responseType: MovieResults.self) { (response, error) in
+        let task = taskForGETRequest(url: Endpoints.search(movieName).url, responseType: MovieResults.self) { (response, error) in
             if let response = response {
                 completionHandler(response.results, nil)
             } else {
                 completionHandler([], error)
             }
         }
-        
+        return task
     }
     
     class func getFavourites(completionHandler: @escaping ([Movie], Error?) -> Void) {
@@ -161,8 +161,16 @@ class TMDBClient {
                 }
                 
             } catch {
-                DispatchQueue.main.async {
-                    completion(nil, error)
+                
+                do {
+                    let errorResponse = try decoder.decode(TMDBResponse.self, from: data)
+                    DispatchQueue.main.async {
+                        completion(nil, errorResponse)
+                    }
+                }catch {
+                    DispatchQueue.main.async {
+                        completion(nil, error)
+                    }
                 }
             }
         }
@@ -172,7 +180,7 @@ class TMDBClient {
     
     
     
-    class func taskForGETRequest<ResponseType: Decodable>(url: URL, responseType: ResponseType.Type, completionHandler: @escaping (ResponseType?, Error?) -> Void) {
+    @discardableResult class func taskForGETRequest<ResponseType: Decodable>(url: URL, responseType: ResponseType.Type, completionHandler: @escaping (ResponseType?, Error?) -> Void) -> URLSessionTask {
         
         let task = URLSession.shared.dataTask(with: url) { (data, response, error) in
             guard let data = data else {
@@ -190,13 +198,22 @@ class TMDBClient {
                 }
                 
             } catch {
-                DispatchQueue.main.async {
-                    completionHandler(nil, error)
-                }
                 
+                do {
+                    let errorResponse = try decoder.decode(TMDBResponse.self, from: data)
+                    DispatchQueue.main.async {
+                        completionHandler(nil, errorResponse)
+                    }
+                } catch {
+                
+                    DispatchQueue.main.async {
+                        completionHandler(nil, error)
+                    }
+                }
             }
         }
         task.resume()
+        return task
     }
     
     class func getWatchlist(completion: @escaping ([Movie], Error?) -> Void) {

@@ -35,12 +35,18 @@ class LoginViewController: UIViewController {
             let user = LoginRequest(userName: self.emailTextField.text!, password: self.passwordTextField.text!, requestToken: TMDBClient.Auth.requestToken)
             
             TMDBClient.requestLogin(for: user, completionHandler: self.handleRequestLogin(success:error:))
+        } else {
+            showLoginFailure(message: error?.localizedDescription ?? "")
+            setLoggingIn(false)
         }
     }
     
     private func handleRequestLogin(success: Bool, error: Error?) {
         if success {
             TMDBClient.requestSessionId(completionHandler: handleRequestSessionResponse(success:error:))
+        } else {
+            showLoginFailure(message: error?.localizedDescription ?? "")
+            setLoggingIn(false)
         }
     }
     
@@ -49,6 +55,9 @@ class LoginViewController: UIViewController {
         setLoggingIn(false)
         if success {
             self.performSegue(withIdentifier: "completeLogin", sender: nil)
+        } else {
+            showLoginFailure(message: error?.localizedDescription ?? "")
+            setLoggingIn(false)
         }
     }
     
@@ -70,5 +79,17 @@ class LoginViewController: UIViewController {
         } else {
             activityIndicator.stopAnimating()
         }
+        
+        loginButton.isEnabled = !loggingIn
+        loginViaWebsiteButton.isEnabled = !loggingIn
+        emailTextField.isEnabled = !loggingIn
+        passwordTextField.isEnabled = !loggingIn
+    }
+    
+    
+    func showLoginFailure(message: String) {
+        let alertVC = UIAlertController(title: "Login Failed", message: message, preferredStyle: .alert)
+        alertVC.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+        show(alertVC, sender: nil)
     }
 }
