@@ -9,3 +9,15 @@
 import Foundation
 
 
+struct MarkFavourute: Codable {
+    let mediaType: String
+    let mediaId: Int
+    let favourite: Bool
+    
+    
+    enum CodingKeys: String, CodingKey {
+        case mediaType = "media_type"
+        case mediaId = "media_id"
+        case favourite = "favorite"
+    }
+}

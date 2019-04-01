@@ -31,6 +31,7 @@ class TMDBClient {
         case getFavourites
         case search(String)
         case markWatchList
+        case markFavourite
         
         var stringValue: String {
             switch self {
@@ -51,11 +52,26 @@ class TMDBClient {
                 return Endpoints.base + "/search/movie" + Endpoints.apiKeyParam + "&query=\(query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")"
             case .markWatchList:
                 return Endpoints.base + "/account/\(Auth.accountId)/watchlist" + Endpoints.apiKeyParam + "&session_id=" + Auth.sessionId
+            case .markFavourite:
+                return Endpoints.base + "/account/\(Auth.accountId)/favorite" + Endpoints.apiKeyParam + "&session_id=" + Auth.sessionId
             }
         }
         
         var url: URL {
             return URL(string: stringValue)!
+        }
+    }
+    
+    
+    class func markFavourite(movieID: Int, markFavouture: Bool, completionHandler: @escaping (Bool, Error?) -> Void) {
+        let markFavouriteList = MarkFavourute(mediaType: "movie", mediaId: movieID, favourite: markFavouture)
+        
+        taskForPOSTRequest(url: Endpoints.markFavourite.url, responseType: TMDBResponse.self, body: markFavouriteList) { (response, error) in
+            if let response = response {
+                completionHandler([1, 12, 13].contains(response.statusCode), nil)
+            } else {
+                completionHandler(false, error)
+            }
         }
     }
     
